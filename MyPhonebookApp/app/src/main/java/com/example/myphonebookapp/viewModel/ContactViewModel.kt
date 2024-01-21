@@ -1,4 +1,4 @@
-package com.example.myphonebookapp.contact
+package com.example.myphonebookapp.viewModel
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -6,8 +6,10 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.myphonebookapp.avatarapi.AvatarModel
-import com.example.myphonebookapp.avatarapi.RetrofitClient
+import com.example.myphonebookapp.model.AvatarModel
+import com.example.myphonebookapp.client.RetrofitClient
+import com.example.myphonebookapp.repository.ContactRepository
+import com.example.myphonebookapp.model.ContactModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.UUID

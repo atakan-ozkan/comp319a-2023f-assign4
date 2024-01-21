@@ -16,8 +16,8 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.room.Room
 import com.example.myphonebookapp.appdb.AppDatabase
-import com.example.myphonebookapp.contact.ContactRepository
-import com.example.myphonebookapp.contact.ContactViewModel
+import com.example.myphonebookapp.repository.ContactRepository
+import com.example.myphonebookapp.viewModel.ContactViewModel
 import com.example.myphonebookapp.screen.ContactDetailScreen
 import com.example.myphonebookapp.screen.ContactScreen
 import com.example.myphonebookapp.ui.theme.MyPhonebookAppTheme
@@ -48,7 +48,7 @@ class MainActivity : ComponentActivity() {
     }
 
     @Composable
-    fun PhoneBookAppNavigation(contactsViewModel: ContactViewModel,context: Context) {
+    fun PhoneBookAppNavigation(contactsViewModel: ContactViewModel, context: Context) {
         val navController = rememberNavController()
         NavHost(navController = navController, startDestination = "contactsList") {
             composable("contactsList") {

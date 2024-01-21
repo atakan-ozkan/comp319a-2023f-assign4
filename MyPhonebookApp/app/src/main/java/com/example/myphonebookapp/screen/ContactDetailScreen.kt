@@ -4,6 +4,7 @@ import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -31,18 +32,23 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.myphonebookapp.R
-import com.example.myphonebookapp.contact.ContactViewModel
+import com.example.myphonebookapp.viewModel.ContactViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ContactDetailScreen(contactId: Int, contactViewModel: ContactViewModel , navController: NavController, context: Context) {
+fun ContactDetailScreen(contactId: Int, contactViewModel: ContactViewModel, navController: NavController, context: Context) {
     val contact by contactViewModel.getContactById(contactId).observeAsState()
     var name by remember { mutableStateOf(contact?.name ?: "") }
     var surname by remember { mutableStateOf(contact?.surname ?: "") }
     var phoneNumber by remember { mutableStateOf(contact?.phoneNumber ?: "") }
-    var email by remember { mutableStateOf(contact?.phoneNumber ?: "") }
-    var address by remember { mutableStateOf(contact?.phoneNumber ?: "") }
-    var avatarKey by remember { mutableStateOf(contact?.phoneNumber ?: "") }
+    var email by remember { mutableStateOf(contact?.email ?: "") }
+    var address by remember { mutableStateOf(contact?.address ?: "") }
+    var avatarKey by remember { mutableStateOf(contact?.avatarKey ?: "") }
+    val isNameValid = remember(name) { isValidNameOrSurname(name) }
+    val isSurnameValid = remember(surname) { isValidNameOrSurname(surname) }
+    val isPhoneNumberValid = remember(phoneNumber) { isValidPhoneNumber(phoneNumber) }
+    val isRequiredFieldsValid = remember(isNameValid,isSurnameValid,isPhoneNumberValid)
+    { isNameValid && isSurnameValid && isPhoneNumberValid}
 
     LaunchedEffect(contact?.id) {
         contact?.let { contactViewModel.fetchAvatar(it.id, it.avatarKey) }
@@ -62,6 +68,7 @@ fun ContactDetailScreen(contactId: Int, contactViewModel: ContactViewModel , nav
             },
             actions = {
                 IconButton(onClick = {
+                    if (isRequiredFieldsValid){
                         val updatedContact = contact?.let {
                             contact!!.copy(
                                 name= name,
@@ -76,6 +83,7 @@ fun ContactDetailScreen(contactId: Int, contactViewModel: ContactViewModel , nav
                             Toast.makeText(context, "Contact is updated!", Toast.LENGTH_SHORT).show()
                         }
                         navController.popBackStack()
+                    }
                 }) {
                     Icon(painterResource(R.drawable.save_icon), contentDescription = "Save")
                 }
@@ -89,7 +97,7 @@ fun ContactDetailScreen(contactId: Int, contactViewModel: ContactViewModel , nav
             }
         )
         Column(
-            modifier = Modifier.align(CenterHorizontally)
+            modifier = Modifier.align(CenterHorizontally).padding(10.dp)
 
         ) {
             avatarBitmap?.let { bitmap ->
@@ -98,6 +106,7 @@ fun ContactDetailScreen(contactId: Int, contactViewModel: ContactViewModel , nav
                     modifier = Modifier.size(128.dp).clip(CircleShape).align(Alignment.CenterHorizontally)
                 )
             } ?: Text("No Image Available")
+
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it },
@@ -126,14 +135,15 @@ fun ContactDetailScreen(contactId: Int, contactViewModel: ContactViewModel , nav
                 onValueChange = { address = it },
                 label = { Text("Address") },
             )
-            if (name.isEmpty() || name == "") {
-                Text("Contact name must be entered!", color = MaterialTheme.colorScheme.secondary)
-            } else if (surname.isEmpty() || surname == "") {
-                Text("Contact surname must be entered!", color = MaterialTheme.colorScheme.secondary)
+            if (!isNameValid) {
+                Text("Contact name must be entered in order to save!", color = MaterialTheme.colorScheme.secondary, style = MaterialTheme.typography.bodySmall)
             }
-            else if (phoneNumber.isEmpty() || phoneNumber == "" || phoneNumber.length < 3) {
-                Text("Contact phone number must be entered and the length must be greater than 3!",
-                    color = MaterialTheme.colorScheme.secondary)
+            if (!isSurnameValid) {
+                Text("Contact surname must be entered in order to save!", color = MaterialTheme.colorScheme.secondary, style = MaterialTheme.typography.bodySmall)
+            }
+            if (!isPhoneNumberValid) {
+                Text("Valid Contact phone number entered in order to save!",
+                    color = MaterialTheme.colorScheme.secondary, style = MaterialTheme.typography.bodySmall)
             }
 
         }

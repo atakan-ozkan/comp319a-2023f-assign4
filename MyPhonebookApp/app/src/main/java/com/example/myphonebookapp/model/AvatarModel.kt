@@ -1,4 +1,4 @@
-package com.example.myphonebookapp.avatarapi
+package com.example.myphonebookapp.model
 
 import android.graphics.Bitmap
 

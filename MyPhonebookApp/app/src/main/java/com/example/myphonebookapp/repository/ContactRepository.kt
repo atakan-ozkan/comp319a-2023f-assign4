@@ -1,10 +1,11 @@
-package com.example.myphonebookapp.contact
+package com.example.myphonebookapp.repository
 
-import androidx.lifecycle.LiveData
+import com.example.myphonebookapp.dao.ContactDao
+import com.example.myphonebookapp.model.ContactModel
 
 class ContactRepository(private val contactDao: ContactDao) {
 
-    fun getContactById(contactId: Int): ContactModel{
+    fun getContactById(contactId: Int): ContactModel {
         return contactDao.getContactById(contactId)
     }
 

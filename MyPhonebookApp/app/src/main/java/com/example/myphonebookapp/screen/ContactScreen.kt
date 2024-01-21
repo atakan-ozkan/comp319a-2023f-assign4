@@ -25,6 +25,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
@@ -32,6 +33,8 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -57,15 +60,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.LiveData
 import androidx.navigation.NavController
-import com.example.myphonebookapp.contact.ContactModel
-import com.example.myphonebookapp.contact.ContactViewModel
+import com.example.myphonebookapp.model.ContactModel
+import com.example.myphonebookapp.viewModel.ContactViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ContactScreen(contactViewModel: ContactViewModel,navController: NavController,context: Context) {
+fun ContactScreen(contactViewModel: ContactViewModel, navController: NavController, context: Context) {
     var showAddContactDialog by remember { mutableStateOf(false) }
     var searchText by remember { mutableStateOf("") }
+    var showMenu by remember { mutableStateOf(false) }
+    var agreeAlertDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         contactViewModel.loadContacts()
@@ -74,7 +79,25 @@ fun ContactScreen(contactViewModel: ContactViewModel,navController: NavControlle
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
             TopAppBar(
-                title = { Text("My Contacts") }
+                title = { Text("My Contacts") },
+                actions = {
+
+                    IconButton(onClick = { showMenu = !showMenu }) {
+                        Icon(Icons.Filled.MoreVert, contentDescription = "Menu")
+                        DropdownMenu(
+                            expanded = showMenu,
+                            onDismissRequest = { showMenu = false }
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text("Delete All Contacts") },
+                                onClick = {
+                                    showMenu = false
+                                    agreeAlertDialog = true
+                                })
+                        }
+                    }
+                }
+
             )
             SearchBar(
                 searchText = searchText,
@@ -92,6 +115,17 @@ fun ContactScreen(contactViewModel: ContactViewModel,navController: NavControlle
                 showAddContactDialog = true
             }
         }
+        if(agreeAlertDialog){
+            ShowAgreeAlert(
+                onDismiss = {agreeAlertDialog = false},
+                onClickAgree = {
+                    agreeAlertDialog = false
+                    contactViewModel.deleteAllContacts()
+                    contactViewModel.loadContacts()
+                }
+
+            )
+        }
     }
     if (showAddContactDialog) {
         ShowContactDialog(
@@ -107,7 +141,7 @@ fun ContactScreen(contactViewModel: ContactViewModel,navController: NavControlle
 }
 
 @Composable
-fun ContactList(context: Context,contacts: LiveData<List<ContactModel>>, contactViewModel: ContactViewModel, navController: NavController) {
+fun ContactList(context: Context, contacts: LiveData<List<ContactModel>>, contactViewModel: ContactViewModel, navController: NavController) {
     val contactList by contacts.observeAsState(initial = emptyList())
     var expandedContactId by remember { mutableStateOf<Int?>(null) }
 
@@ -179,7 +213,7 @@ fun ContactItem(
 }
 
 @Composable
-fun DropdownPanel(context: Context,contact: ContactModel, navController: NavController) {
+fun DropdownPanel(context: Context, contact: ContactModel, navController: NavController) {
     Row(
         modifier = Modifier
             .fillMaxWidth(),
@@ -399,6 +433,35 @@ fun SearchBar(
             Text("Reset")
         }
     }
+}
+
+@Composable
+fun ShowAgreeAlert(
+    onDismiss: () -> Unit,
+    onClickAgree: () -> Unit){
+
+    AlertDialog(
+        onDismissRequest = { onDismiss() },
+        title = { Text("Are you sure") },
+        text = {
+            Text(text = "You are deleting all contacts, are you sure?")
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    onClickAgree()
+                    onDismiss()
+                }
+            ) {
+                Text("Yes")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = { onDismiss() }) {
+                Text("No")
+            }
+        }
+    )
 }
 
 fun isValidNameOrSurname(input: String): Boolean {

@@ -1,4 +1,4 @@
-package com.example.myphonebookapp.avatarapi
+package com.example.myphonebookapp.api
 
 import okhttp3.ResponseBody
 import retrofit2.Call
